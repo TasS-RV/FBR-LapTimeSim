@@ -207,8 +207,8 @@ def process_track(track_tuple, car, verbose=False):
         x_full = np.concatenate((x_full, x_current+x_segment)) #Updates full list of displacements  
 
         #Instantaneous power use - extrapolating from intepolator function based on current rpm and engine data
-        for current_vel in v_segment:
-            #Note: in IC, this misleadingly only gives first gear power - actual value depends on which gear we are in            
+        for n, current_vel in enumerate(v_segment):
+            #Note: in IC, this misleadingly only gives power when operating in first gear - actual value depends on which gear we are in            
             rpm = current_vel*car.powertrain.ratios[0]*60/(2*np.pi*0.2445)   #[0] index 0 corresponds to first gear (constant drive ratio for EV)
             
             if car.powertrain.ic == True:
@@ -232,8 +232,12 @@ def process_track(track_tuple, car, verbose=False):
         
             power_full = np.append(power_full, power)  #Value by value list accumulation - instead of 'list' concatenations
             rpm_full = np.append(rpm_full, rpm) #RPM checking to see if we ever exit knee-point torque/ power (rpm @ curve kink)
-            instant_current = np.append(instant_current, power/((car.powertrain.T_max/I_rms)*2*np.pi*rpm/60)) #Power / w = Torque, where Torque = k*phi*I_applied
             
+            
+            if current_vel - v_segment[n-1] < 0: #If braking - then current 'sense' relative to Accumulator terminals is negative (NOTE: current through windings remains positive)
+                instant_current = np.append(instant_current, -1*power/((car.powertrain.T_max/I_rms)*2*np.pi*rpm/60)) #Power / w = Torque, where Torque = k*phi*I_applied
+            else:
+                instant_current = np.append(instant_current, power/((car.powertrain.T_max/I_rms)*2*np.pi*rpm/60))             
 
         v_end[i%len(speeds)]=v_segment[-1]
         
@@ -304,7 +308,7 @@ def process_track(track_tuple, car, verbose=False):
     
 
         #2nd set of plots display Duty-cycle of the car over total lap_duration
-        fig, ax1 = plt.subplots()
+        fig, (ax1, ax3) = plt.subplots(2,1, sharex = True)
     
         ax1.set_xlabel('Time (s)')
         ax1.set_ylabel('Velocity (m/s)', color= 'red')
@@ -321,17 +325,21 @@ def process_track(track_tuple, car, verbose=False):
         ax2.tick_params(axis='y', labelcolor= 'green')
 
 
-        ax3 = ax1.twinx()
         ax3.set_xlabel('Time (s)')
         ax3.set_ylabel('Current Draw (A)', color= 'blue')
-        ax3.plot(time_full, instant_current, color='blue')
+        ax3.scatter(time_full, instant_current, color='blue', s = 1)
         ax3.tick_params(axis='y', labelcolor= 'blue')
-
+     
 
         plt.title("Duty cycle of vehicle comparing Velocity and Power plots over lap-time elapsed.")
         plt.show()
         
-    return total_time
+    #Total energy consumption: integration of instantaneous power with timesteps:    
+    energy = 0
+    for p, t0, t in zip(power_full[:-1], time_full[:-1], time_full[1:]):
+        energy += p*(t-t0)
+        
+    return total_time, energy
 
 
 
@@ -437,7 +445,7 @@ def compare_cars(track_tuple, car, ref_car):
         if len(v_list)==2:
             v_segment = np.minimum(v_list[0],v_list[1])
         if len(v_list)==3:
-            v_segment = np.minimum(np.minimum(v_list[0],v_list[1]),v_list[2])
+            v_segment = np.minimum(np.minimum(v_list[0],v_list[1]),v_list[2]) #Compares set of 2, then following set of minima
 
         if len(v_list_ref)==1:
             v_segment_ref = v_list_ref[0]
@@ -913,7 +921,7 @@ for n, motor in enumerate(motors_list, 1):
     FBRev.powertrain.engine_data = f"Motor{n}.csv"  
     FBRev.powertrain.update() #Updates file reading
     FBRev.update()
-    time = process_track(read_track('FSA Track.dxf'),FBRev, verbose=False)
+    time = process_track(read_track('FSA Track.dxf'),FBRev, verbose=False)[0]
     
     if time < fastest_time:
         fastest_time = time
@@ -922,8 +930,10 @@ for n, motor in enumerate(motors_list, 1):
 FBRev.powertrain.engine_data = f"Motor{best_motor}.csv"  
 FBRev.powertrain.update() #Updates file reading
 FBRev.update()
-print("Best motor is: {} with a lap-time of: {:.2f}".format(best_motor, fastest_time))
-process_track(read_track('FSA Track.dxf'),FBRev, verbose=True)    
+
+print("Best motor is: {} with a lap-time of: {:.2f}s.\n Total energy consumption: {:.2f} MJ".format(best_motor, fastest_time, process_track(read_track('FSA Track.dxf'),FBRev, verbose=False)[1]/(1e6)))
+process_track(read_track('FSA Track.dxf'),FBRev, verbose=True)
+    
 
 #compare_cars(read_track('FSA Track.dxf'),FBR23,FBR27)
 #FBR23.acceleration(verbose=True)
