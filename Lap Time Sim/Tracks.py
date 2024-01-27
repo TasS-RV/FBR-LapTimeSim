@@ -7,6 +7,7 @@ from scipy.interpolate import interp1d
 import scipy.optimize as opt
 import CarData
 
+from Parameters import motors_list
 
 '''Simulation functions'''
 
@@ -224,6 +225,15 @@ def process_track(track_tuple, car, verbose=False):
                 else:  
                     power = car.powertrain.f_power(rpm)
             #Appending to total list of powers (against RPM)
+
+            """Use power values to get a profile of voltage over time - current limit will set the voltage"""
+
+
+
+
+
+
+
             power_full = np.append(power_full, power)  #Value by value list accumulation - instead of 'list' concatenations
             rpm_full = np.append(rpm_full, rpm) #RPM checking to see if we ever exit knee-point torque/ power (rpm @ curve kink)
 
@@ -295,26 +305,28 @@ def process_track(track_tuple, car, verbose=False):
         plt.show()
     
 
-    #2nd set of plots display Duty-cycle of the car over total lap_duration
-    fig, ax1 = plt.subplots()
-  
-    ax1.set_xlabel('Time (s)')
-    ax1.set_ylabel('Velocity (m/s)', color= 'red')
-    ax1.plot(time_full, v_full, color='red')
-    #ax1.plot(x_full, v_full, color='red') #Instead of time varying duty cycle - displacement varying duty cycle 
-    ax1.tick_params(axis='y', labelcolor= 'red')
+        #2nd set of plots display Duty-cycle of the car over total lap_duration
 
-    # Create a second y-axis sharing the same x-axis
-    ax2 = ax1.twinx()
-   
-    ax2.set_xlabel('Time (s)')
-    ax2.set_ylabel('Power draw (kW)', color= 'green')
-    ax2.plot(time_full, power_full/1000, color='green')
-    ax2.tick_params(axis='y', labelcolor= 'green')
+        fig, ax1 = plt.subplots()
+    
+        ax1.set_xlabel('Time (s)')
+        ax1.set_ylabel('Velocity (m/s)', color= 'red')
+        ax1.plot(time_full, v_full, color='red')
+        #ax1.plot(x_full, v_full, color='red') #Instead of time varying duty cycle - displacement varying duty cycle 
+        ax1.tick_params(axis='y', labelcolor= 'red')
 
-    plt.title("Duty cycle of vehicle comparing Velocity and Power plots over lap-time elapsed.")
-    plt.show()
+        # Create a second y-axis sharing the same x-axis
+        ax2 = ax1.twinx()
+    
+        ax2.set_xlabel('Time (s)')
+        ax2.set_ylabel('Power draw (kW)', color= 'green')
+        ax2.plot(time_full, power_full/1000, color='green')
+        ax2.tick_params(axis='y', labelcolor= 'green')
 
+        plt.title("Duty cycle of vehicle comparing Velocity and Power plots over lap-time elapsed.")
+        
+        plt.show()
+        
     return total_time
 
 def compare_cars(track_tuple, car, ref_car):
@@ -492,15 +504,16 @@ def compare_cars(track_tuple, car, ref_car):
         colorplot(ax[2],xmap,ymap,v_segment-v_segment_ref,vmin=-5,vmax=5,cmap_name='seismic')
 
     #axis titles etc
-    ax[0].set(xlabel='Distance/m', ylabel='Velocity /ms^-1', title='Total Time Difference= {} s'.format(np.round(total_time-total_time_ref,3)))
-    ax[1].set(xlabel='Time / s', ylabel='Velocity / ms^-1')
-    ax[2].set(aspect='equal', title='Track map')
-    ax[2].set_facecolor('grey')
-    sm = plt.cm.ScalarMappable(cmap=mpl.colormaps['seismic'], norm = mpl.colors.Normalize(vmin=-5,vmax=5))
-    sm.set_array([])
-    plt.colorbar(sm, ticks=np.linspace(-5, 5, 11),label='Velocity / ms^-1', ax = ax[2])
-    fig.suptitle('Comparing FBR23 against FBR20', fontsize=16)
-    plt.show()
+    if verbose:
+        ax[0].set(xlabel='Distance/m', ylabel='Velocity /ms^-1', title='Total Time Difference= {} s'.format(np.round(total_time-total_time_ref,3)))
+        ax[1].set(xlabel='Time / s', ylabel='Velocity / ms^-1')
+        ax[2].set(aspect='equal', title='Track map')
+        ax[2].set_facecolor('grey')
+        sm = plt.cm.ScalarMappable(cmap=mpl.colormaps['seismic'], norm = mpl.colors.Normalize(vmin=-5,vmax=5))
+        sm.set_array([])
+        plt.colorbar(sm, ticks=np.linspace(-5, 5, 11),label='Velocity / ms^-1', ax = ax[2])
+        fig.suptitle('Comparing FBR23 against FBR20', fontsize=16)
+        plt.show()
 
     return total_time
 
@@ -865,21 +878,21 @@ FBR23.powertrain.update()
 FBR23.update()
 
 
-#______ This block generates the FBR27 - with identical characteristics to the FBR23 drive train except:
+#______ This block generates the FBRev - with identical characteristics to the FBR23 drive train except:
 #1. Replacing engine P/T curves with Motor   2. Single applied gear ratio
-FBR27 = CarData.car()
-FBR27.m=340 #25 kg Aero kit + 15 kg surplus electronics
+FBRev = CarData.car()
+FBRev.m=340 #25 kg Aero kit + 15 kg surplus electronics
 
 #Key parameter changes for EV - final_drive bypasses R6 gearbox ratios
-FBR27.powertrain.final_drive = 12
+FBRev.powertrain.final_drive = 12
 """Rear gear teeth/ front gear teeth: currently approx. 31/ 11, wants to be higher for greater torque"""
-FBR27.powertrain.ic = False
-FBR27.powertrain.engine_data = "Sensible_IEV.csv"  
-
+FBRev.powertrain.ic = False
 gear_ratios = [1] #Even if single gear ratio, must be entered as an array
 
-FBR27.powertrain.update() #Updates file reading
-FBR27.update()
+
+FBRev.powertrain.engine_data = "Motor20.csv"  
+FBRev.powertrain.update() #Updates file reading
+FBRev.update()
 
 #Verfication to check geometry of torque and power curves
 def tp_curve_check(car):
@@ -891,17 +904,25 @@ def tp_curve_check(car):
 
 #tp_curve_check(FBR27)
 
+fastest_time = 1000 #Arvitrarily high lap-time: impossible
+
+for n, motor in enumerate(motors_list, 1):
+    FBRev.powertrain.engine_data = f"Motor{n}.csv"  
+    FBRev.powertrain.update() #Updates file reading
+    FBRev.update()
+    time = process_track(read_track('FSA Track.dxf'),FBRev, verbose=False)
+    
+    if time < fastest_time:
+        fastest_time = time
+        best_motor = n #nth motor - required for auto-generating the track performance for the fastest motor
+
+FBRev.powertrain.engine_data = f"Motor{best_motor}.csv"  
+FBRev.powertrain.update() #Updates file reading
+FBRev.update()
+print("Best motor is: {} with a lap-time of: {:.2f}".format(best_motor, fastest_time))
+process_track(read_track('FSA Track.dxf'),FBRev, verbose=True)    
+
 #compare_cars(read_track('FSA Track.dxf'),FBR23,FBR27)
-
-process_track(read_track('FSA Track.dxf'),FBR27, verbose=True) 
-
-#process_track(read_track('compound_curves.dxf'),FBR20, verbose=True)
-#process_track(read_track('FSA_Track.dxf'),FBR23, verbose=True)
-
 #FBR23.acceleration(verbose=True)
 #FBR20.acceleration(verbose=True)
 
-
-'''
-Very off drive ratio having to be used - recheck scalings to do a sanity check from the wheels to the engine for RPM conversions
-'''

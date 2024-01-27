@@ -80,9 +80,8 @@ resolution = 100 #Affects number of increments the speed-range of the motor is s
 
 """Requirement: generate a number of motor torque-speed characteristics based on varying peak torques and transition frequencies"""
 
-
-test_torques = np.linspace(60, 80, 4)
-#test_powers = np.array([70000]) #Will not require parameter anyways as T*w = Power
+test_torques = np.linspace(50, 80, 4)
+#Will not require parameter for varying power anyways as T*w = Power
 w1_variable = np.linspace(1000,5000,5)
 
 motors_list = {}
@@ -95,7 +94,6 @@ for T_max in test_torques:
       #  motors_list[n-1] = motor(18000, W1, T_max, T_max*W1*np.pi*2/60, 1.2*T_max, 1.2*(T_max*W1*np.pi*2/60), "Motor{}".format(n))
         n +=1
 
-print(motors_list['motor3'].P_peak)
 
 
 
