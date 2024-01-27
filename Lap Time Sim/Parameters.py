@@ -3,6 +3,10 @@ import math
 import matplotlib.pyplot as plt
 import pandas as pd #Read motor parameters from Excel file
 
+#Accumulator parameters
+V_max = 400
+I_rms = 200
+
 class FS_car:
     def __init__(self, gear_ratio, car_mass, grip_limit, wheel_rad, drag_coeff, frontal_area):
         self.g = gear_ratio
@@ -25,6 +29,7 @@ class motor:
         self.T_peak = peak_torque
         self.P = normal_power
         self.P_peak = peak_power
+        self.k_phi = normal_torque/I_rms #T = k*phi*I_applied for a Permanent Magnet drive
 
         #Motor Identifier for labelling the correct graph
         self.name = obj_name
@@ -82,19 +87,15 @@ resolution = 100 #Affects number of increments the speed-range of the motor is s
 
 test_torques = np.linspace(50, 80, 4)
 #Will not require parameter for varying power anyways as T*w = Power
-w1_variable = np.linspace(1000,5000,5)
+w1_variable = np.linspace(1000,7000,5)
 
 motors_list = {}
-#motors_list = [motor1, motor2, motor3, motor4, motor5, motor6, motor7, motor8, motor9, motor10, motor11, motor12, motor13, motor14, motor15, motor16, motor17, motor18, motor19, motor20]
 
 n = 1 #Count up each motor instance
 for T_max in test_torques:
     for W1 in w1_variable: #The peak_power and torque figures are arbitrarily set to not need to modify __init__ function of the class!
         motors_list[f"motor{n}"] = motor(18000, W1, T_max, T_max*W1*np.pi*2/60, 1.2*T_max, 1.2*(T_max*W1*np.pi*2/60), "Motor{}".format(n))         
-      #  motors_list[n-1] = motor(18000, W1, T_max, T_max*W1*np.pi*2/60, 1.2*T_max, 1.2*(T_max*W1*np.pi*2/60), "Motor{}".format(n))
         n +=1
-
-
 
 
 

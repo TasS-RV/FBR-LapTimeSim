@@ -59,8 +59,8 @@ class powertrain():
         self.f_power = interp1d(data[:,0],data[:,2])
         self.f_torque = interp1d(data[:,0],data[:,1])
         
-
-
+        self.T_max = max(data[:,1]) #Peak torque value  
+       
         self.max_rpm = data[-1,0]
         self.min_rpm = data[0,0]
 '''(TS)Must modify the interpolator function to be able to accomodate Power and Torque curves - currently this may be getting generated incorrectly'''

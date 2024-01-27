@@ -7,7 +7,7 @@ from scipy.interpolate import interp1d
 import scipy.optimize as opt
 import CarData
 
-from Parameters import motors_list
+from Parameters import motors_list, I_rms
 
 '''Simulation functions'''
 
@@ -162,6 +162,8 @@ def process_track(track_tuple, car, verbose=False):
     power_full = np.array([])
     time_full = np.array([])
     rpm_full = np.array([])
+    #Instantaneous current draw from Accumulator
+    instant_current = np.array([])
 
     for i in range(i_start,len(speeds)+i_start):
         x_segment = np.linspace(0,lengths[i%len(speeds)],100) # this is the array of x for the segment - (TS) i%len(speeds) modulo to jump back to correct sector
@@ -227,15 +229,11 @@ def process_track(track_tuple, car, verbose=False):
             #Appending to total list of powers (against RPM)
 
             """Use power values to get a profile of voltage over time - current limit will set the voltage"""
-
-
-
-
-
-
-
+        
             power_full = np.append(power_full, power)  #Value by value list accumulation - instead of 'list' concatenations
             rpm_full = np.append(rpm_full, rpm) #RPM checking to see if we ever exit knee-point torque/ power (rpm @ curve kink)
+            instant_current = np.append(instant_current, power/((car.powertrain.T_max/I_rms)*2*np.pi*rpm/60)) #Power / w = Torque, where Torque = k*phi*I_applied
+            
 
         v_end[i%len(speeds)]=v_segment[-1]
         
@@ -306,7 +304,6 @@ def process_track(track_tuple, car, verbose=False):
     
 
         #2nd set of plots display Duty-cycle of the car over total lap_duration
-
         fig, ax1 = plt.subplots()
     
         ax1.set_xlabel('Time (s)')
@@ -323,11 +320,21 @@ def process_track(track_tuple, car, verbose=False):
         ax2.plot(time_full, power_full/1000, color='green')
         ax2.tick_params(axis='y', labelcolor= 'green')
 
+
+        ax3 = ax1.twinx()
+        ax3.set_xlabel('Time (s)')
+        ax3.set_ylabel('Current Draw (A)', color= 'blue')
+        ax3.plot(time_full, instant_current, color='blue')
+        ax3.tick_params(axis='y', labelcolor= 'blue')
+
+
         plt.title("Duty cycle of vehicle comparing Velocity and Power plots over lap-time elapsed.")
-        
         plt.show()
         
     return total_time
+
+
+
 
 def compare_cars(track_tuple, car, ref_car):
     '''Compares 2 cars' laps around track_tuple. Works almost exactly the same as process_track()'''
@@ -890,10 +897,6 @@ FBRev.powertrain.ic = False
 gear_ratios = [1] #Even if single gear ratio, must be entered as an array
 
 
-FBRev.powertrain.engine_data = "Motor20.csv"  
-FBRev.powertrain.update() #Updates file reading
-FBRev.update()
-
 #Verfication to check geometry of torque and power curves
 def tp_curve_check(car):
     rpm_values = np.linspace(car.powertrain.min_rpm,car.powertrain.max_rpm, 1000)
@@ -904,7 +907,7 @@ def tp_curve_check(car):
 
 #tp_curve_check(FBR27)
 
-fastest_time = 1000 #Arvitrarily high lap-time: impossible
+fastest_time = 1000 #Arbitrarily high lap-time: impossible
 
 for n, motor in enumerate(motors_list, 1):
     FBRev.powertrain.engine_data = f"Motor{n}.csv"  
