@@ -893,7 +893,7 @@ def tp_curve_check(car):
 
 #compare_cars(read_track('FSA Track.dxf'),FBR23,FBR27)
 
-process_track(read_track('boring_track.dxf'),FBR27, verbose=True) 
+process_track(read_track('FSA Track.dxf'),FBR27, verbose=True) 
 
 #process_track(read_track('compound_curves.dxf'),FBR20, verbose=True)
 #process_track(read_track('FSA_Track.dxf'),FBR23, verbose=True)
