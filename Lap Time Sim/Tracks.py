@@ -871,7 +871,7 @@ FBR27 = CarData.car()
 FBR27.m=340 #25 kg Aero kit + 15 kg surplus electronics
 
 #Key parameter changes for EV - final_drive bypasses R6 gearbox ratios
-FBR27.powertrain.final_drive = 10
+FBR27.powertrain.final_drive = 12
 """Rear gear teeth/ front gear teeth: currently approx. 31/ 11, wants to be higher for greater torque"""
 FBR27.powertrain.ic = False
 FBR27.powertrain.engine_data = "Sensible_IEV.csv"  
