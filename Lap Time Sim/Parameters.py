@@ -76,50 +76,26 @@ FBR23 = FS_car(gear_ratio, car_mass, grip_mu*(car_mass*9.81*0.5),wheel_rad, drag
    
     
 #______Motor properties______
-resolution = 1000 #Affects number of increments the speed-range of the motor is split into    
-
-motor_file = "Motors_def.xlsx"
-df = pd.ExcelFile(motor_file)
-
-# Assuming you have a sheet named "Sheet1" in your Excel file
-# Access a specific table (e.g., Table1) within that sheet
-table_name = 'Sheet1'
-table_df = df.parse(table_name)
-
-# Defining up to 3 motors based on contents of Excel file 
-motor1 = motor(table_df['w3'][0], table_df['w1'][0], table_df['T_nominal'][0], table_df['P_nominal'][0], table_df['T_peak'][0], table_df['P_peak'][0], table_df['Motor'][0])
-motor2 = motor(table_df['w3'][1], table_df['w1'][1], table_df['T_nominal'][1], table_df['P_nominal'][1], table_df['T_peak'][1], table_df['P_peak'][1], table_df['Motor'][1])
-motor3 = motor(table_df['w3'][2], table_df['w1'][2], table_df['T_nominal'][2], table_df['P_nominal'][2], table_df['T_peak'][2], table_df['P_peak'][2], table_df['Motor'][2])
-
-motors_list = [motor1, motor2, motor3]
-
+resolution = 100 #Affects number of increments the speed-range of the motor is split into    
 
 """Requirement: generate a number of motor torque-speed characteristics based on varying peak torques and transition frequencies"""
 
 
-test_torques = np.linspace(60, 80, 2)
+test_torques = np.linspace(60, 80, 4)
 #test_powers = np.array([70000]) #Will not require parameter anyways as T*w = Power
-w1_variable = np.array(1000,5000,3)
+w1_variable = np.linspace(1000,5000,5)
 
-
-motor1 = motor(18000, 0, 0, 0, 0, 0, "")
-motor2 = motor(18000, 0, 0, 0, 0, 0, "")
-motor3 = motor(18000, 0, 0, 0, 0, 0, "")
-motor4 = motor(18000, 0, 0, 0, 0, 0, "")
-motor5 = motor(18000, 0, 0, 0, 0, 0, "")
-motor6 = motor(18000, 0, 0, 0, 0, 0, "")
-
-test_motors = [motor1, motor2, motor3, motor4, motor5, motor6] #, motor7, motor8, motor9, motor10, motor11, motor12, motor13, motor14, motor15, motor16, motor17, motor18, motor19, motor20]
+motor_list = {}
+#motors_list = [motor1, motor2, motor3, motor4, motor5, motor6, motor7, motor8, motor9, motor10, motor11, motor12, motor13, motor14, motor15, motor16, motor17, motor18, motor19, motor20]
 
 n = 1 #Count up each motor instance
 for T_max in test_torques:
-    for W1 in w1_variables: #The peak_power and torque figures are arbitrarily set to not need to modify __init__ function of the class!
-        testmotors[n-1] = motor(18000, W1, T_max, T_max*W1*np.pi()*2/60, 1.2*T_max, 1.2*(T_max*W1*np.pi()*2/60), "Motor{}".format(n))
+    for W1 in w1_variable: #The peak_power and torque figures are arbitrarily set to not need to modify __init__ function of the class!
+        motor_list[f"motor{n}"] = motor(18000, W1, T_max, T_max*W1*np.pi*2/60, 1.2*T_max, 1.2*(T_max*W1*np.pi*2/60), "Motor{}".format(n))         
+      #  motors_list[n-1] = motor(18000, W1, T_max, T_max*W1*np.pi*2/60, 1.2*T_max, 1.2*(T_max*W1*np.pi*2/60), "Motor{}".format(n))
         n +=1
 
-
-#def __init__(self, speed_max, trans_freq, normal_torque, normal_power, peak_torque, peak_power, obj_name):
-
+print(motor_list['motor3'].P_peak)
 
 
 

@@ -138,9 +138,9 @@ def s_net(vel, s_list, t_list, motor_, car):
 -Also prints Maximum speed (either drag limited, or limited by rotational speed of the motor itself)
 '''
 
-#This is gonna be fun...
 
 for motor_ in motors_list:
+
     displacements_list = [0]
     times_list  = [0]
 
