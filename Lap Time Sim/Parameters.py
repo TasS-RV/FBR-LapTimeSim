@@ -85,17 +85,17 @@ test_torques = np.linspace(60, 80, 4)
 #test_powers = np.array([70000]) #Will not require parameter anyways as T*w = Power
 w1_variable = np.linspace(1000,5000,5)
 
-motor_list = {}
+motors_list = {}
 #motors_list = [motor1, motor2, motor3, motor4, motor5, motor6, motor7, motor8, motor9, motor10, motor11, motor12, motor13, motor14, motor15, motor16, motor17, motor18, motor19, motor20]
 
 n = 1 #Count up each motor instance
 for T_max in test_torques:
     for W1 in w1_variable: #The peak_power and torque figures are arbitrarily set to not need to modify __init__ function of the class!
-        motor_list[f"motor{n}"] = motor(18000, W1, T_max, T_max*W1*np.pi*2/60, 1.2*T_max, 1.2*(T_max*W1*np.pi*2/60), "Motor{}".format(n))         
+        motors_list[f"motor{n}"] = motor(18000, W1, T_max, T_max*W1*np.pi*2/60, 1.2*T_max, 1.2*(T_max*W1*np.pi*2/60), "Motor{}".format(n))         
       #  motors_list[n-1] = motor(18000, W1, T_max, T_max*W1*np.pi*2/60, 1.2*T_max, 1.2*(T_max*W1*np.pi*2/60), "Motor{}".format(n))
         n +=1
 
-print(motor_list['motor3'].P_peak)
+print(motors_list['motor3'].P_peak)
 
 
 
