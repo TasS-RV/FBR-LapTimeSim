@@ -137,6 +137,9 @@ def s_net(vel, s_list, t_list, motor_, car):
 -Iteratively computing the time taken to complete 75m of track - acc() and s_net() functions used
 -Also prints Maximum speed (either drag limited, or limited by rotational speed of the motor itself)
 '''
+
+#This is gonna be fun...
+
 for motor_ in motors_list:
     displacements_list = [0]
     times_list  = [0]

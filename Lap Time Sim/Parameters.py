@@ -94,6 +94,33 @@ motor3 = motor(table_df['w3'][2], table_df['w1'][2], table_df['T_nominal'][2], t
 motors_list = [motor1, motor2, motor3]
 
 
+"""Requirement: generate a number of motor torque-speed characteristics based on varying peak torques and transition frequencies"""
+
+
+test_torques = np.linspace(60, 80, 2)
+#test_powers = np.array([70000]) #Will not require parameter anyways as T*w = Power
+w1_variable = np.array(1000,5000,3)
+
+
+motor1 = motor(18000, 0, 0, 0, 0, 0, "")
+motor2 = motor(18000, 0, 0, 0, 0, 0, "")
+motor3 = motor(18000, 0, 0, 0, 0, 0, "")
+motor4 = motor(18000, 0, 0, 0, 0, 0, "")
+motor5 = motor(18000, 0, 0, 0, 0, 0, "")
+motor6 = motor(18000, 0, 0, 0, 0, 0, "")
+
+test_motors = [motor1, motor2, motor3, motor4, motor5, motor6] #, motor7, motor8, motor9, motor10, motor11, motor12, motor13, motor14, motor15, motor16, motor17, motor18, motor19, motor20]
+
+n = 1 #Count up each motor instance
+for T_max in test_torques:
+    for W1 in w1_variables: #The peak_power and torque figures are arbitrarily set to not need to modify __init__ function of the class!
+        testmotors[n-1] = motor(18000, W1, T_max, T_max*W1*np.pi()*2/60, 1.2*T_max, 1.2*(T_max*W1*np.pi()*2/60), "Motor{}".format(n))
+        n +=1
+
+
+#def __init__(self, speed_max, trans_freq, normal_torque, normal_power, peak_torque, peak_power, obj_name):
+
+
 
 
 
