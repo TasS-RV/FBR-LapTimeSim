@@ -230,14 +230,18 @@ def process_track(track_tuple, car, verbose=False):
 
             """Use power values to get a profile of voltage over time - current limit will set the voltage"""
         
-            power_full = np.append(power_full, power)  #Value by value list accumulation - instead of 'list' concatenations
+            #power_full = np.append(power_full, power)  #Value by value list accumulation - instead of 'list' concatenations
+            
             rpm_full = np.append(rpm_full, rpm) #RPM checking to see if we ever exit knee-point torque/ power (rpm @ curve kink)
             
             
             if current_vel - v_segment[n-1] < 0: #If braking - then current 'sense' relative to Accumulator terminals is negative (NOTE: current through windings remains positive)
                 instant_current = np.append(instant_current, -1*power/((car.powertrain.T_max/I_rms)*2*np.pi*rpm/60)) #Power / w = Torque, where Torque = k*phi*I_applied
+                power_full = np.append(power_full, 0)  #Value by value list accumulation - instead of 'list' concatenations
+
             else:
-                instant_current = np.append(instant_current, power/((car.powertrain.T_max/I_rms)*2*np.pi*rpm/60))             
+                instant_current = np.append(instant_current, power/((car.powertrain.T_max/I_rms)*2*np.pi*rpm/60)) 
+                power_full = np.append(power_full, power) 
 
         v_end[i%len(speeds)]=v_segment[-1]
         
@@ -882,7 +886,7 @@ FBR20.update()
 
 FBR23 = CarData.car()
 FBR23.m=330 #20kg of aero kit and paddle shift
-FBR23.powertrain.final_drive=3
+FBR23.powertrain.final_drive= 3.5
 FBR23.powertrain.shift_time=0.2
 
 FBR23.powertrain.ratios_0 = [16.06, 12.44, 10.39, 8.98, 8] #(TS) R6 engine Gear Ratios - last updated by Aidan 22/23 
@@ -891,15 +895,15 @@ FBR23.powertrain.ic = True
 
 FBR23.powertrain.update()
 FBR23.update()
-
+#process_track(read_track('FSA Track.dxf'), FBR20, verbose=True)
 
 #______ This block generates the FBRev - with identical characteristics to the FBR23 drive train except:
 #1. Replacing engine P/T curves with Motor   2. Single applied gear ratio
 FBRev = CarData.car()
-FBRev.m=340 #25 kg Aero kit + 15 kg surplus electronics
+FBRev.m=320 #25 kg Aero kit + 15 kg surplus electronics #Kish
 
 #Key parameter changes for EV - final_drive bypasses R6 gearbox ratios
-FBRev.powertrain.final_drive = 12
+FBRev.powertrain.final_drive = 12 #Kish
 """Rear gear teeth/ front gear teeth: currently approx. 31/ 11, wants to be higher for greater torque"""
 FBRev.powertrain.ic = False
 gear_ratios = [1] #Even if single gear ratio, must be entered as an array
@@ -921,7 +925,7 @@ for n, motor in enumerate(motors_list, 1):
     FBRev.powertrain.engine_data = f"Motor{n}.csv"  
     FBRev.powertrain.update() #Updates file reading
     FBRev.update()
-    time = process_track(read_track('FSA Track.dxf'),FBRev, verbose=False)[0]
+    time = process_track(read_track('boring_track.dxf'),FBRev, verbose=False)[0] #Kish
     
     if time < fastest_time:
         fastest_time = time
@@ -931,8 +935,8 @@ FBRev.powertrain.engine_data = f"Motor{best_motor}.csv"
 FBRev.powertrain.update() #Updates file reading
 FBRev.update()
 
-print("Best motor is: {} with a lap-time of: {:.2f}s.\n Total energy consumption: {:.2f} MJ".format(best_motor, fastest_time, process_track(read_track('FSA Track.dxf'),FBRev, verbose=False)[1]/(1e6)))
-process_track(read_track('FSA Track.dxf'),FBRev, verbose=True)
+print("Best motor is: {} with a lap-time of: {:.2f}s.\n Total energy consumption: {:.2f} MJ".format(best_motor, fastest_time, process_track(read_track('boring_track.dxf'),FBRev, verbose=False)[1]/(1e6)))
+process_track(read_track('boring_track.dxf'),FBRev, verbose=True)
     
 
 #compare_cars(read_track('FSA Track.dxf'),FBR23,FBR27)

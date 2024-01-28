@@ -85,9 +85,9 @@ resolution = 100 #Affects number of increments the speed-range of the motor is s
 
 """Requirement: generate a number of motor torque-speed characteristics based on varying peak torques and transition frequencies"""
 
-test_torques = np.linspace(50, 80, 4)
+test_torques = np.linspace(50, 90, 4) #Kish
 #Will not require parameter for varying power anyways as T*w = Power
-w1_variable = np.linspace(1000,7000,5)
+w1_variable = np.linspace(1000,2000,3) #Kish - python Plotter.py
 
 motors_list = {}
 
