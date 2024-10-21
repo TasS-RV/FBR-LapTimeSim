@@ -307,7 +307,7 @@ def process_track(track_tuple, car, verbose=False):
         ax[2].set(aspect='equal', title='Track map')
         sm = plt.cm.ScalarMappable(cmap=mpl.colormaps['jet'], norm = mpl.colors.Normalize(vmin=0,vmax=35))
         sm.set_array([])
-        plt.colorbar(sm, ticks=np.linspace(0, 35, 11),label='Velocity / ms^-1', ax = ax)
+        plt.colorbar(sm, ticks=np.linspace(0, 35, 11),label='Velocity / ms^-1', ax = ax[2])
         plt.show()
     
 
@@ -904,10 +904,20 @@ FBRev.m=320 #25 kg Aero kit + 15 kg surplus electronics #Kish
 
 #Key parameter changes for EV - final_drive bypasses R6 gearbox ratios
 FBRev.powertrain.final_drive = 12 #Kish
-"""Rear gear teeth/ front gear teeth: currently approx. 31/ 11, wants to be higher for greater torque"""
-FBRev.powertrain.ic = False
-gear_ratios = [1] #Even if single gear ratio, must be entered as an array
+"""
+- Rear gear teeth/ front gear teeth: currently approx. 31/ 11, wants to be higher for greater torque.
+- The gear_ratios must be entered as an array - even if this is an EV, it must = [1]. For the R6 engine, it will be the 5 speed
+gear ratios from the CRANK to the ENGINE-SIDE SPROCKET.
 
+- The engine_data must be set to the Motor{n}.txt data file. This is the file in the following format:
+rpm (w) | torque (Nm) | power (W)
+0       | 0           |  0
+Data is obtained from Inetic IEV180 motor datasheet. Found in: https://app.nuclino.com/FBR/EV/EV5---Motor-and-Motor-Test-Bench-0b117bf6-17bf-40d6-9a3a-6842e60d8159
+
+- FBRev.powertrain.final_drive = g --> g is the gear ratio between the motor sprocket and the wheel sprocket (on the differential). 
+"""
+FBRev.powertrain.ic = False
+gear_ratios = [1] 
 
 #Verfication to check geometry of torque and power curves
 def tp_curve_check(car):
@@ -919,27 +929,32 @@ def tp_curve_check(car):
 
 #tp_curve_check(FBR27)
 
+# Purposefully truncates the number of motors, to minimise the time required for the runs to setup - this is if we don't necessarily want to run the optimisation code.
+motors_sub = ["motor2"]
+motors_subsample = {key: motors_list[key] for key in motors_sub if key in motors_list}
+# motors_subsample = motors_list - comment this out to get the full list of motors instead
+trackfile = "FSA_track.dxf"
+
 fastest_time = 1000 #Arbitrarily high lap-time: impossible
 
-
 # Comment this out to do the iterative run
-# for n, motor in enumerate(motors_list, 1):
-#     FBRev.powertrain.engine_data = f"Motor{n}.csv"  
-#     FBRev.powertrain.update() #Updates file reading
-#     FBRev.update()
-#     time = process_track(read_track('boring_track.dxf'),FBRev, verbose=False)[0] #Kish
+for n, motor in enumerate(motors_subsample, 1):
+    FBRev.powertrain.engine_data = f"Motor{n}.csv"  
+    FBRev.powertrain.update() #Updates file reading
+    FBRev.update()
+    time = process_track(read_track(trackfile),FBRev, verbose=False)[0] #Kish
     
-#     if time < fastest_time:
-#         fastest_time = time
-#         best_motor = n #nth motor - required for auto-generating the track performance for the fastest motor
+    if time < fastest_time:
+        fastest_time = time
+        best_motor = n #nth motor - required for auto-generating the track performance for the fastest motor
 
-# FBRev.powertrain.engine_data = f"Motor{best_motor}.csv"  
-# FBRev.powertrain.update() #Updates file reading
-# FBRev.update()
+FBRev.powertrain.engine_data = f"Motor{best_motor}.csv"  
+FBRev.powertrain.update() 
+FBRev.update()
 
-# print("Best motor is: {} with a lap-time of: {:.2f}s.\n Total energy consumption: {:.2f} MJ".format(best_motor, fastest_time, process_track(read_track('boring_track.dxf'),FBRev, verbose=False)[1]/(1e6)))
+print("Best motor is: {} with a lap-time of: {:.2f}s.\n Total energy consumption: {:.2f} MJ".format(best_motor, fastest_time, process_track(read_track('boring_track.dxf'),FBRev, verbose=False)[1]/(1e6)))
 
-process_track(read_track('FSA_track.dxf'),FBRev, verbose=True)
+process_track(read_track(trackfile),FBRev, verbose=True)
     
 
 #compare_cars(read_track('FSA Track.dxf'),FBR23,FBR27)

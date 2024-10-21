@@ -89,6 +89,11 @@ test_torques = np.linspace(50, 90, 4) #Kish
 #Will not require parameter for varying power anyways as T*w = Power
 w1_variable = np.linspace(1000,2000,3) #Kish - python Plotter.py
 
+'''
+Creates mutliple instances of the motor class with varying torque and transition frequency values. 
+
+Pyhton dictionary is used to store the instances with a unique key for each instance - each key, is in fact the 'n'th motor.
+'''
 motors_list = {}
 
 n = 1 #Count up each motor instance
