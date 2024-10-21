@@ -137,22 +137,20 @@ laps = 30
 
 if __name__ == "__main__":
     # Code below runs the motor optimisation function, which iterates over each Motor Torque-Power-speed curve and finds the fastest lap time.
-    motor_optimise(trackfile, FBRev, motors_list, motors_sub = ["motor1","motor2","motor3","motor4"])
+    #motor_optimise(trackfile, FBRev, motors_list, motors_sub = ["motor1","motor2","motor3","motor4"])
 
     # Code below is to run a single instance
     results = process_track(read_track(trackfile),FBRev, verbose=False)
     energy_consumed = results[1]/(1e6)
     fastest_time = results[0]
-
-    process_track(read_track(trackfile),FBRev, verbose= show_plot)
-    print(f"____Configuration information and results:_____\n\n"
+    
+    # engine, track_name, save_drivecycle - these are not defined in the first run of process_track(), because verbone = False - this overrides any visualisation of plots anyways.
+    process_track(read_track(trackfile),FBRev, engine = f"Motor{motor_num}", track_name = trackfile.strip(".dxf"), save_drivecycle = True, verbose= show_plot)
+    print(f"____Configuration information and results:_____\n\n",
         f"Motor file: {motor_num}\n"
-        f"Track file: {trackfile}\n"
-        f"Fastest Lap time: {fastest_time}\n"
-        f"Energy consumption/ lap: {energy_consumed} MJ\n")
+        f" Track file: {trackfile}\n"
+        " Fastest Lap time: {:.3f}\n".format(fastest_time),
+        "Energy consumption/ lap: {:.3f} MJ\n".format(energy_consumed))
     
 
-
-'''
-Need to also implement a way to obtain the drive cycle, as both a plot and a .csv file.
-'''
+# Drive_Cycle_Anchor - crtl + F this to locate the region storing all of the drive cycle variables and plots in tehe Tracks.py file.
