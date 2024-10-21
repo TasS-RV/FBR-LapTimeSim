@@ -307,7 +307,7 @@ def process_track(track_tuple, car, verbose=False):
         ax[2].set(aspect='equal', title='Track map')
         sm = plt.cm.ScalarMappable(cmap=mpl.colormaps['jet'], norm = mpl.colors.Normalize(vmin=0,vmax=35))
         sm.set_array([])
-        plt.colorbar(sm, ticks=np.linspace(0, 35, 11),label='Velocity / ms^-1', ax = ax[2])
+        plt.colorbar(sm, ticks=np.linspace(0, 35, 11),label='Velocity / ms^-1', ax = ax)
         plt.show()
     
 
@@ -921,22 +921,25 @@ def tp_curve_check(car):
 
 fastest_time = 1000 #Arbitrarily high lap-time: impossible
 
-for n, motor in enumerate(motors_list, 1):
-    FBRev.powertrain.engine_data = f"Motor{n}.csv"  
-    FBRev.powertrain.update() #Updates file reading
-    FBRev.update()
-    time = process_track(read_track('boring_track.dxf'),FBRev, verbose=False)[0] #Kish
+
+# Comment this out to do the iterative run
+# for n, motor in enumerate(motors_list, 1):
+#     FBRev.powertrain.engine_data = f"Motor{n}.csv"  
+#     FBRev.powertrain.update() #Updates file reading
+#     FBRev.update()
+#     time = process_track(read_track('boring_track.dxf'),FBRev, verbose=False)[0] #Kish
     
-    if time < fastest_time:
-        fastest_time = time
-        best_motor = n #nth motor - required for auto-generating the track performance for the fastest motor
+#     if time < fastest_time:
+#         fastest_time = time
+#         best_motor = n #nth motor - required for auto-generating the track performance for the fastest motor
 
-FBRev.powertrain.engine_data = f"Motor{best_motor}.csv"  
-FBRev.powertrain.update() #Updates file reading
-FBRev.update()
+# FBRev.powertrain.engine_data = f"Motor{best_motor}.csv"  
+# FBRev.powertrain.update() #Updates file reading
+# FBRev.update()
 
-print("Best motor is: {} with a lap-time of: {:.2f}s.\n Total energy consumption: {:.2f} MJ".format(best_motor, fastest_time, process_track(read_track('boring_track.dxf'),FBRev, verbose=False)[1]/(1e6)))
-process_track(read_track('boring_track.dxf'),FBRev, verbose=True)
+# print("Best motor is: {} with a lap-time of: {:.2f}s.\n Total energy consumption: {:.2f} MJ".format(best_motor, fastest_time, process_track(read_track('boring_track.dxf'),FBRev, verbose=False)[1]/(1e6)))
+
+process_track(read_track('FSA_track.dxf'),FBRev, verbose=True)
     
 
 #compare_cars(read_track('FSA Track.dxf'),FBR23,FBR27)
