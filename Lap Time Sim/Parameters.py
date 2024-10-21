@@ -8,7 +8,26 @@ V_max = 400
 I_rms = 200
 
 class FS_car:
+
     def __init__(self, gear_ratio, car_mass, grip_limit, wheel_rad, drag_coeff, frontal_area):
+        """
+        Initializes the FS_car with the given parameters.
+
+        Parameters:
+        -----------
+        gear_ratio : float
+            Gear ratio of the car - this will be entered as an array, into the powertrain() class.
+        car_mass : float
+            Mass of the FBR.
+        grip_limit : float
+            Grip limit of the tyre
+        wheel_rad : float
+            Radius of the wheel.
+        drag_coeff : float
+            Drag coefficient of the car.
+        frontal_area : float
+            Frontal area of the car.
+        """
         self.g = gear_ratio
         self.rw = wheel_rad
         self.F_limit = grip_limit
@@ -22,6 +41,26 @@ class FS_car:
 class motor:
 
     def __init__(self, speed_max, trans_freq, normal_torque, normal_power, peak_torque, peak_power, obj_name):
+        """
+        Initializes the motor with the given parameters.
+
+        Parameters:
+        -----------
+        speed_max : float
+            Maximum speed of the motor.
+        trans_freq : float
+            Transition frequency of the motor - this is the 'knee' point on the torque-speed graph, where it goes from contant torque to constant power.
+        normal_torque : float
+            Normal torque of the motor.
+        normal_power : float
+            Normal power of the motor.
+        peak_torque : float
+            Peak torque of the motor.
+        peak_power : float
+            Peak power of the motor.
+        obj_name : str
+            Name of the motor object.
+        """
         self.w3 = 2*np.pi*speed_max/60  #Frequencies in revolutions per second instead of minute
         self.w1 = 2*np.pi*trans_freq/60
         #Key points on frequency graph

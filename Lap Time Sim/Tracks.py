@@ -952,7 +952,7 @@ FBRev.powertrain.engine_data = f"Motor{best_motor}.csv"
 FBRev.powertrain.update() 
 FBRev.update()
 
-print("Best motor is: {} with a lap-time of: {:.2f}s.\n Total energy consumption: {:.2f} MJ".format(best_motor, fastest_time, process_track(read_track('boring_track.dxf'),FBRev, verbose=False)[1]/(1e6)))
+print("Best motor is: {} with a lap-time of: {:.2f}s.\n Total energy consumption: {:.2f} MJ".format(best_motor, fastest_time, process_track(read_track(trackfile),FBRev, verbose=False)[1]/(1e6)))
 
 process_track(read_track(trackfile),FBRev, verbose=True)
     
