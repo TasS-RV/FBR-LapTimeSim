@@ -1,5 +1,6 @@
 from Tracks import *
 from Parameters import motors_list, I_rms, V_max
+import ezdxf
 
 
 def tp_curve_check(car):

@@ -91,6 +91,7 @@ class motor:
          
     @property
     def powers(self):
+
         rise_region = np.array([w*self.T for w in self.speeds[0:(math.floor((self.w1/self.w3)*resolution))]])
 
         const_region = np.zeros(resolution - math.ceil((self.w1/self.w3)*resolution))
@@ -103,17 +104,41 @@ class motor:
     
 
 #_____Car properties______    
+# Car properties
+rc = 23  # Diameter of engine-side sprocket in mm
+"""Diameter of engine-side sprocket in mm"""
 
-rc = 23 #Diameter of engine-side sprocket in mm
-rs = 100 #Diameter of Axle sprocket in mm
-gear_ratio = rs/rc
-car_mass = 240 #Dry mass in Kg
-grip_mu = 4 #Maximum coefficinet of friction for car grip limit
-wheel_rad = 0.225 #Wheel total diameter in m - assuming 100 contact patch @ 0 deg. camber
+rs = 100  # Diameter of axle sprocket in mm
+"""Diameter of axle sprocket in mm"""
 
-#Ask aero to roughly model these values
+gear_ratio = rs / rc
+"""Gear ratio of the car"""
+
+car_mass = 240  # Dry mass in Kg
+"""Dry mass of the car in kilograms"""
+
+grip_mu = 4  # Maximum coefficient of friction for car grip limit
+"""Maximum coefficient of friction for car grip limit"""
+
+wheel_rad = 0.225  # Wheel total diameter in m - assuming 100 contact patch @ 0 deg. camber
+"""Wheel total diameter in meters - assuming 100 contact patch at 0 degrees camber"""
+
+# Aero properties
 drag_coeff = 0.728
-frontal_area = 2  #Approcimate total frontal area in m^2
+"""Drag coefficient of the car"""
+
+frontal_area = 2  # Approximate total frontal area in m^2
+"""Approximate total frontal area of the car in square meters"""
+
+FBR23 = FS_car(gear_ratio, car_mass, grip_mu * (car_mass * 9.81 * 0.5), wheel_rad, drag_coeff, frontal_area)
+"""Instance of FS_car with the specified properties"""
+
+# Motor properties
+resolution = 100  # Affects number of increments the speed-range of the motor is split into
+"""Affects number of increments the speed-range of the motor is split into"""
+
+
+
 
 FBR23 = FS_car(gear_ratio, car_mass, grip_mu*(car_mass*9.81*0.5),wheel_rad, drag_coeff, frontal_area)
 #Note - the grip limit assumes the car is on the limit of wheely-ing - front wheels slam back onto ground after movement 
@@ -124,15 +149,19 @@ resolution = 100 #Affects number of increments the speed-range of the motor is s
 
 """Requirement: generate a number of motor torque-speed characteristics based on varying peak torques and transition frequencies"""
 
-test_torques = np.linspace(50, 90, 4) #Kish
-#Will not require parameter for varying power anyways as T*w = Power
-w1_variable = np.linspace(1000,2000,3) #Kish - python Plotter.py
+# Requirement: generate a number of motor torque-speed characteristics based on varying peak torques and transition frequencies
+test_torques = np.linspace(50, 90, 4)  # Kish
+"""Array of test torques ranging from 50 to 90 Nm. , this can be visualised in the Python Plotter.py"""
 
-'''
+w1_variable = np.linspace(1000, 2000, 3)  
+"""Array of transition frequencies ranging from 1000 to 2000 RPM, this can be visualised in the Python Plotter.py"""
+
+
+"""
 Creates mutliple instances of the motor class with varying torque and transition frequency values. 
+Python dictionary is used to store the instances with a unique key for each instance - each key, is in fact the 'n'th motor.
+"""
 
-Pyhton dictionary is used to store the instances with a unique key for each instance - each key, is in fact the 'n'th motor.
-'''
 motors_list = {}
 
 n = 1 #Count up each motor instance
