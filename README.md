@@ -35,3 +35,9 @@ gear_ratios = [1]
 motor_num = 9
 FBRev.powertrain.engine_data = f"Motor{motor_num}.csv"
 ```
+Alternatively, uncomment the following line and call the motors_optimise function - this will iterate over each and every motor (essentially different Torque, Speed, Power curves) to calculate which one gives the fastest laptime. It will also print out the energy consumtion, as the integral of V*I, where V is assumed constant, and I is the instantaneous current draw by the motor at any time. 
+
+The motors_sub = ["motor1","motor2","motor3","motor4"] array is there simply to speed up the testing when this code was being written, you can remove that parameter entirely from the function call, or leave it in and add or remove particular motors to play around with whcih motors you want to run for the iterative checking of fastest lap-time.
+```python
+motor_optimise(trackfile, FBRev, motors_list, motors_sub = ["motor1","motor2","motor3","motor4"])
+```
