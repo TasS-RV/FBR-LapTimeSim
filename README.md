@@ -7,7 +7,7 @@ To run this project, follow these commands in your terminal:
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/your-repo-name.git
+git clone https://github.com/TasS-RV/FBR-LapTimeSim
 
 # Navigate into the project directory
 cd ./"Lap Time Sim"
